@@ -18,7 +18,19 @@ export class InstructorsService {
     return this.http.get<Array<Instructor>>(this.base_url + "/instructors/all");
   }
 
-  public searchCourse(keyword:string ,currentPage:number ,pageSize:number,): Observable<PageResponse<Instructor>>{
+  public searchInstructors(keyword:string ,currentPage:number ,pageSize:number,): Observable<PageResponse<Instructor>>{
     return this.http.get<PageResponse<Instructor>>(this.base_url + "/instructors?keyword="+keyword+"&page="+currentPage+"&size="+pageSize);
+  }
+
+  public saveInstructor(instructor:Instructor): Observable<PageResponse<Instructor>>{
+    return this.http.post<PageResponse<Instructor>>(this.base_url + "/instructors",instructor);
+  }
+
+  public deleteInstructor(instructorId:number){
+    return this.http.delete(this.base_url + "/instructors/"+ instructorId);
+  }
+
+  public updateInstructor(instructor:Instructor,instructorId:number):Observable<PageResponse<Instructor>>{
+    return this.http.put<PageResponse<Instructor>>(this.base_url + "/instructors/"+instructorId,instructor);
   }
 }
