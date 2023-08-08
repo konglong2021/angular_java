@@ -6,6 +6,10 @@ import {Instructor} from "../../model/instructor.model";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {InstructorsService} from "../../services/instructors.service";
 import {User} from "../../model/user.model";
+import {EmailExistsValidator} from "../../validators/emailexists.validator";
+import {UsersService} from "../../services/users.service";
+import {Course} from "../../model/course.model";
+import {CoursesService} from "../../services/courses.service";
 
 @Component({
   selector: 'app-teachers',
@@ -21,13 +25,18 @@ export class TeachersComponent implements OnInit {
   updateFormGroup!:FormGroup;
   pageInstructor$!: Observable<PageResponse<Instructor>>;
   saveInstructor$!: Observable<PageResponse<Instructor>>;
+  instructorCourse$!: Observable<PageResponse<Course>>;
+  instructorSaveId!: Instructor;
   currentPage:number = 0;
+  instructorCourseCurrentPage:number = 0;
   pageSize:number = 10;
   errorMessage!:string;
   submmited:boolean = false;
 
   constructor(private modalService: NgbModal,private fb:FormBuilder,
-              private instructorService:InstructorsService) {}
+              private instructorService:InstructorsService,
+              private usersService:UsersService,
+              private courseService:CoursesService) {}
 
   ngOnInit(): void {
     this.searchFormGroup = this.fb.group({
@@ -38,7 +47,7 @@ export class TeachersComponent implements OnInit {
       lastName:["",Validators.required],
       summary:["",Validators.required],
       user: this.fb.group({
-        email:["",Validators.required],
+        email:["",[Validators.required,Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")],[EmailExistsValidator.validate(this.usersService)]],
         password:["",Validators.required],
       })
     })
@@ -103,8 +112,6 @@ export class TeachersComponent implements OnInit {
     });
   }
 
-
-
   onUpdateMedal(updateModal: any) {
     this.submmited = true;
     if (this.updateFormGroup.invalid) return;
@@ -130,6 +137,28 @@ export class TeachersComponent implements OnInit {
       summary:[i.summary,Validators.required],
     })
     this.modalService.open(updateContent,{size:'xl'})
+  }
+
+
+  InstructorCourses(i: Instructor, instructorCourses: any) {
+    this.instructorSaveId = i;
+    this.getInstructorCourses(this.instructorSaveId);
+    this.modalService.open(instructorCourses,{size:'xl'})
+  }
+
+  getInstructorCourses(instructor:Instructor){
+    this.instructorCourse$ = this.instructorService.getCoursesByInstructor(instructor.instructorId,this.instructorCourseCurrentPage,this.pageSize).pipe(
+      catchError ( err => {
+        this.errorMessage = err.message;
+        return throwError(err);
+      })
+    );
+  }
+
+
+  gotoCoursePage(page: number) {
+    this.instructorCourseCurrentPage = page;
+    this.getInstructorCourses(this.instructorSaveId);
   }
 }
 

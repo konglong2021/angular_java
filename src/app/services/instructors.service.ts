@@ -5,6 +5,7 @@ import {Instructor} from "../model/instructor.model";
 import {environment} from "../../environments/environment";
 import {PageResponse} from "../model/page.response.model";
 import {runCommand} from "@angular/cli/src/command-builder/command-runner";
+import {Course} from "../model/course.model";
 
 @Injectable({
   providedIn: 'root'
@@ -32,5 +33,9 @@ export class InstructorsService {
 
   public updateInstructor(instructor:Instructor,instructorId:number):Observable<PageResponse<Instructor>>{
     return this.http.put<PageResponse<Instructor>>(this.base_url + "/instructors/"+instructorId,instructor);
+  }
+
+  public getCoursesByInstructor(instructorId:number,currentPage:number,pageSize:number) : Observable<PageResponse<Course>>{
+    return this.http.get<PageResponse<Course>>(this.base_url + "/instructors/" + instructorId + "/courses?page="+ currentPage + "&size="+ pageSize);
   }
 }

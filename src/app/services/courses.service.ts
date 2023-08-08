@@ -28,4 +28,6 @@ export class CoursesService {
     console.log(course);
     return this.http.put<Course>(environment.backendHost + "/course/"+ courseId,course);
   }
+
+
 }

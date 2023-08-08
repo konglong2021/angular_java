@@ -37,6 +37,7 @@
           <td>{{i.summary}}</td>
           <td><button (click)="handleDeleteInstructor(i)" class="btn btn-danger"><i class="bi-trash"></i></button></td>
           <td><button (click)="updateInstructor(i,updateContent)" class="btn btn-success"><i class="bi bi-pencil"></i></button></td>
+          <td><button (click)="InstructorCourses(i,instructorCourses)" class="btn btn-info"><i class="bi bi-book"></i></button></td>
         </tr>
         </tbody>
         <tfoot>
@@ -72,7 +73,7 @@
 
 <ng-template #content let-modal>
   <div class="modal-header">
-    <div class="modal-title text-muted"><i class="fa-regular fa-circle-dot"></i>&nbsp; Registration Form</div>
+    <div class="modal-title text-muted"><i class="fa-regular fa-circle-dot"></i>&nbsp; Instructor Create Form</div>
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
@@ -81,14 +82,24 @@
       <div class="col-md-4">
         <div class="form-group">
           <label class="text-muted">First Name</label>
-          <input type="text" formControlName="firstName" class="form-control form-font rounded-0 mt-1 mb-3" name="fname">
+          <input type="text" formControlName="firstName"
+                 [ngClass]="{'is-invalid' : submmited && createFormGroup.controls['firstName'].errors}"
+                 class="form-control form-font rounded-0 mt-1 mb-3" name="fname">
+          <div *ngIf="submmited && createFormGroup.controls['firstName'].errors" class="invalid-feedback">
+            <div *ngIf="createFormGroup.controls['firstName'].errors['required']">First name is required</div>
+          </div>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="form-group">
           <label class="text-muted">Last Name</label>
-          <input type="text" formControlName="lastName" class="form-control form-font rounded-0 mt-1 mb-3" name="fname">
+          <input type="text" formControlName="lastName"
+                 [ngClass]="{'is-invalid' : submmited && createFormGroup.controls['lastName'].errors}"
+                 class="form-control form-font rounded-0 mt-1 mb-3" name="fname">
+          <div *ngIf="submmited && createFormGroup.controls['lastName'].errors" class="invalid-feedback">
+            <div *ngIf="createFormGroup.controls['lastName'].errors['required']">Last name is required</div>
+          </div>
         </div>
       </div>
 
@@ -96,7 +107,12 @@
       <div class="col-md-4">
         <div class="form-group">
           <label class="text-muted">Summary</label>
-          <input type="text" formControlName="summary" class="form-control form-font rounded-0 mt-1 mb-3" name="fname">
+          <input type="text" formControlName="summary"
+                 [ngClass]="{'is-invalid' : submmited && createFormGroup.controls['summary'].errors}"
+                 class="form-control form-font rounded-0 mt-1 mb-3" name="fname">
+          <div *ngIf="submmited && createFormGroup.controls['summary'].errors" class="invalid-feedback">
+            <div *ngIf="createFormGroup.controls['summary'].errors['required']">Summary is required</div>
+          </div>
         </div>
       </div>
 
@@ -104,7 +120,14 @@
       <div class="col-md-4">
         <div class="form-group">
           <label class="text-muted">Email</label>
-          <input type="email" formControlName="email" class="form-control form-font rounded-0 mt-1 mb-3" name="fname">
+          <input type="email" formControlName="email"
+                 [ngClass]="{'is-invalid' : submmited && createFormGroup.get('user.email')?.errors}"
+                 class="form-control form-font rounded-0 mt-1 mb-3" name="fname">
+          <div *ngIf="submmited && createFormGroup.get('user.email')?.errors" class="invalid-feedback">
+            <div *ngIf="createFormGroup.get('user.email')!.errors?.['required']">Email is required</div>
+            <div *ngIf="createFormGroup.get('user.email')!.errors?.['pattern']">Email is invalid</div>
+            <div *ngIf="createFormGroup.get('user.email')!.errors?.['emailAlreadyExist']">Email already existed</div>
+          </div>
         </div>
       </div>
 
@@ -127,7 +150,7 @@
 </ng-template>
 <ng-template #updateContent let-updateModal>
   <div class="modal-header">
-    <div class="modal-title text-muted"><i class="fa-regular fa-circle-dot"></i>&nbsp; Registration Form</div>
+    <div class="modal-title text-muted"><i class="fa-regular fa-circle-dot"></i>&nbsp;Instructor Update Form</div>
     <button type="button" class="btn-close" aria-label="Close" (click)="updateModal.dismiss('Cross click')"></button>
   </div>
   <div class="modal-body">
@@ -175,4 +198,41 @@
     <button type="button" class="btn btn-sm btn-secondary" (click)="onCloseMedal(updateModal)">Close</button>
     <button type="button" class="btn btn-sm btn-primary" (click)="onUpdateMedal(updateModal)">Save changes</button>
   </div>
+</ng-template>
+
+<ng-template #instructorCourses let-instructorCoursesModal>
+  <div class="modal-header">
+    <div class="modal-title text-muted"><i class="fa-regular fa-circle-dot"></i>&nbsp; Instructor Courses</div>
+    <button type="button" class="btn-close" aria-label="Close" (click)="instructorCoursesModal.dismiss('Cross click')"></button>
+  </div>
+  <div class="modal-body">
+    <ng-container *ngIf="instructorCourse$ | async as instructorCoursesListing; else failureOrLoading">
+    <table class="table table-striped table-hover" style="width:100%">
+      <thead>
+      <tr>
+        <th>Course id</th>
+        <th>Course Name</th>
+        <th>Course Duration</th>
+        <th>Course Description</th>
+      </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ic of instructorCoursesListing.content">
+          <td>{{ic.courseId}}</td>
+          <td>{{ic.courseName}}</td>
+          <td>{{ic.courseDuration}}</td>
+          <td>{{ic.courseDescription}}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+      <ul class="nav nav-pills">
+        <li *ngFor="let item of [].constructor(instructorCoursesListing.totalPages); let page=index">
+          <a [ngClass]="page==currentPage ? 'btn-info' : 'btn-outline-info' " class="btn mb-1 ms-1 mt-1"  (click)="gotoCoursePage(page)">{{page + 1}}</a>
+        </li>
+      </ul>
+      </tfoot>
+    </table>
+    </ng-container>
+  </div>
+
 </ng-template>
